@@ -2,11 +2,60 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
+#if 0 // in kernel(here is copy from: linux-4.19.269/include/linux/list.h)
 #include <linux/types.h>
 #include <linux/stddef.h>
 #include <linux/poison.h>
 #include <linux/const.h>
 #include <linux/kernel.h>
+#else // porting to our applications
+
+#include <stddef.h> // Definition of "NULL"
+
+struct list_head {
+	struct list_head *next, *prev;
+};
+
+struct hlist_head {
+	struct hlist_node *first;
+};
+
+struct hlist_node {
+	struct hlist_node *next, **pprev;
+};
+
+
+#define WRITE_ONCE(var, val) \
+	(*((volatile typeof(val) *)(&(var))) = (val))
+
+#define READ_ONCE(var) (*((volatile typeof(var) *)(&(var))))
+
+#ifndef bool
+#define bool   int
+#endif
+
+#ifndef true
+#define true   (1)
+#endif
+
+#ifndef false
+#define false  (0)
+#endif
+
+#define LIST_POISON1   (void*) 0
+#define LIST_POISON2   (void*) 0
+
+#ifndef offsetof
+#define offsetof(TYPE, MEMBER)  ((size_t)&((TYPE *)0)->MEMBER)
+#endif
+
+#ifndef container_of
+#define container_of(ptr, type, member) ({          \
+	const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
+	(type *)( (char *)__mptr - offsetof(type,member) );})
+#endif
+
+#endif
 
 /*
  * Simple doubly linked list implementation.
